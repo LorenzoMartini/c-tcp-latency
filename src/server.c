@@ -7,8 +7,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <strings.h>
+#include <fcntl.h>
+#include "connection.h"
 
 #define N_BYTES 1000
+#define N_ROUNDS 1000000
 
 void error(char *msg)
 {
@@ -19,7 +22,7 @@ void error(char *msg)
 int main(int argc, char *argv[])
 {
     int sockfd, newsockfd, portno, clilen;
-    char buffer[1000] = {[0 ... 999] = 'a'};
+    char buffer[N_BYTES] = {[0 ... (N_BYTES - 1)] = 'a'};
     struct sockaddr_in serv_addr, cli_addr;
     int n;
     if (argc < 2) {
@@ -39,23 +42,21 @@ int main(int argc, char *argv[])
         sizeof(serv_addr)) < 0) {
         error("ERROR on binding");
     }
-    listen(sockfd,5);
+    listen(sockfd, 5);
     clilen = sizeof(cli_addr);
     newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
     if (newsockfd < 0) {
         error("ERROR on accept");
     }
+    fcntl(newsockfd, F_SETFL, O_NONBLOCK);
     printf("Connection accepted, ready to receive!\n");
     fflush( stdout );
-    for (;;) {
-        n = read(newsockfd, buffer, N_BYTES);
-        if (n != N_BYTES) {
-            error("ERROR reading from socket");
-        }
-        n = write(newsockfd, buffer, N_BYTES);
-        if (n != N_BYTES) {
-            error("ERROR writing to socket");
-        }
+    int r;
+    for (int i = 0; i < N_ROUNDS; i++) {
+        receive_message(N_BYTES, newsockfd, buffer);
+        send_message(N_BYTES, newsockfd, buffer);
     }
+    printf("Done!\n");
     return 0; 
 }
+

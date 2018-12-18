@@ -7,8 +7,12 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include "connection.h"
 
 #define N_BYTES 1000
+#define N_ROUNDS 1000000
 
 void error(char *msg)
 {
@@ -36,6 +40,7 @@ int main(int argc, char *argv[])
     if (sockfd < 0) {
         error("ERROR opening socket");
     }
+
     server = gethostbyname(argv[1]);
     if (server == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
@@ -54,19 +59,17 @@ int main(int argc, char *argv[])
     time_t now, later;
     struct timespec tstart={0,0}, tend={0,0};
     fflush( stdout );
+
+    // SET NON BLOCKING
+    fcntl(sockfd, F_SETFL, O_NONBLOCK);
     sleep(2);
-    for (int i = 0; i < 1000000; i++) {
+    int r;
+    for (int i = 0; i < N_ROUNDS; i++) {
 
         clock_gettime(CLOCK_MONOTONIC, &tstart);
 
-	n = write(sockfd, wbuffer, strlen(wbuffer));
-	if (n != N_BYTES) {
-	    error("ERROR writing to socket");
-        }
-	n = read(sockfd, rbuffer, N_BYTES);
-	if (n != N_BYTES) {
-	    error("ERROR reading from socket");
-        }
+        send_message(N_BYTES, sockfd, wbuffer);
+        receive_message(N_BYTES, sockfd, rbuffer);
 
         clock_gettime(CLOCK_MONOTONIC, &tend);
 
@@ -77,3 +80,4 @@ int main(int argc, char *argv[])
     }
     return 0;
 }
+
