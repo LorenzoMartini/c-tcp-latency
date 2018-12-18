@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 void error(char *msg)
 {
@@ -20,7 +21,10 @@ int main(int argc, char *argv[])
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
-    char buffer[256];
+    // Init buffers: 1KB
+    char rbuffer[1000] = {[0 ... 999] = 'a'};
+    char wbuffer[1000] = {[0 ... 999] = 'a'};
+
     if (argc < 3) {
        fprintf(stderr,"usage %s hostname port\n", argv[0]);
        exit(0);
@@ -40,26 +44,27 @@ int main(int argc, char *argv[])
          (char *)&serv_addr.sin_addr.s_addr,
          server->h_length);
     serv_addr.sin_port = htons(portno);
-    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) 
+    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) {
         error("ERROR connecting");
-    printf("Connection successful! Start sending stuff");
-    bzero(buffer,256);
-    fgets(buffer,255,stdin);
+    }
+    printf("Connection successful! Wait a few sec...");
     time_t now, later;
     struct timespec tstart={0,0}, tend={0,0};
+    fflush( stdout );
+    sleep(2);
     for (int i = 0; i < 1000000; i++) {
         clock_gettime(CLOCK_MONOTONIC, &tstart);
-	n = write(sockfd,buffer,strlen(buffer));
+	n = write(sockfd, wbuffer, strlen(wbuffer));
 	if (n < 0) {
 	 error("ERROR writing to socket");
         }
-	bzero(buffer,256);
-	n = read(sockfd,buffer,255);
+	n = read(sockfd,rbuffer,1000);
 	if (n < 0) {
 	 error("ERROR reading from socket");
         }
         clock_gettime(CLOCK_MONOTONIC, &tend);
-        printf("some_long_computation took about %.5f seconds\n",
+        printf("Round %d took %.5f seconds\n",
+            i,
            ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec) - 
            ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec));
     }
