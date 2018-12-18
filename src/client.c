@@ -5,6 +5,7 @@
 #include <netdb.h> 
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 void error(char *msg)
 {
@@ -44,7 +45,10 @@ int main(int argc, char *argv[])
     printf("Connection successful! Start sending stuff");
     bzero(buffer,256);
     fgets(buffer,255,stdin);
-    for (int i = 0; i < 100; i++) {
+    time_t now, later;
+    struct timespec tstart={0,0}, tend={0,0};
+    for (int i = 0; i < 1000000; i++) {
+        clock_gettime(CLOCK_MONOTONIC, &tstart);
 	n = write(sockfd,buffer,strlen(buffer));
 	if (n < 0) {
 	 error("ERROR writing to socket");
@@ -54,7 +58,10 @@ int main(int argc, char *argv[])
 	if (n < 0) {
 	 error("ERROR reading from socket");
         }
-	printf("%s\n",buffer);
+        clock_gettime(CLOCK_MONOTONIC, &tend);
+        printf("some_long_computation took about %.5f seconds\n",
+           ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec) - 
+           ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec));
     }
     return 0;
 }
