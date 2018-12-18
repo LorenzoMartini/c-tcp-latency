@@ -78,6 +78,7 @@ int main(int argc, char *argv[])
            ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec) - 
            ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec));
     }
+    close(sockfd);
     return 0;
 }
 

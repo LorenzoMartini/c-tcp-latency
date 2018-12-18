@@ -57,6 +57,8 @@ int main(int argc, char *argv[])
         send_message(N_BYTES, newsockfd, buffer);
     }
     printf("Done!\n");
+    close(sockfd);
+    close(newsockfd);
     return 0; 
 }
 
