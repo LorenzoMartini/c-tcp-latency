@@ -8,6 +8,8 @@
 #include <time.h>
 #include <unistd.h>
 
+#define N_BYTES 1000
+
 void error(char *msg)
 {
     perror(msg);
@@ -22,8 +24,8 @@ int main(int argc, char *argv[])
     struct hostent *server;
 
     // Init buffers: 1KB
-    char rbuffer[1000] = {[0 ... 999] = 'a'};
-    char wbuffer[1000] = {[0 ... 999] = 'a'};
+    char rbuffer[N_BYTES] = {[0 ... (N_BYTES - 1)] = 'a'};
+    char wbuffer[N_BYTES] = {[0 ... (N_BYTES - 1)] = 'a'};
 
     if (argc < 3) {
        fprintf(stderr,"usage %s hostname port\n", argv[0]);
@@ -31,8 +33,9 @@ int main(int argc, char *argv[])
     }
     portno = atoi(argv[2]);
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0) 
+    if (sockfd < 0) {
         error("ERROR opening socket");
+    }
     server = gethostbyname(argv[1]);
     if (server == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
@@ -53,17 +56,21 @@ int main(int argc, char *argv[])
     fflush( stdout );
     sleep(2);
     for (int i = 0; i < 1000000; i++) {
+
         clock_gettime(CLOCK_MONOTONIC, &tstart);
+
 	n = write(sockfd, wbuffer, strlen(wbuffer));
-	if (n < 0) {
-	 error("ERROR writing to socket");
+	if (n != N_BYTES) {
+	    error("ERROR writing to socket");
         }
-	n = read(sockfd,rbuffer,1000);
-	if (n < 0) {
-	 error("ERROR reading from socket");
+	n = read(sockfd, rbuffer, N_BYTES);
+	if (n != N_BYTES) {
+	    error("ERROR reading from socket");
         }
+
         clock_gettime(CLOCK_MONOTONIC, &tend);
-        printf("Round %d took %.5f seconds\n",
+
+        printf("Round %d took %.9f seconds\n",
             i,
            ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec) - 
            ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec));

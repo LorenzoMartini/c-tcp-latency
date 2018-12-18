@@ -8,6 +8,8 @@
 #include <stdlib.h>
 #include <strings.h>
 
+#define N_BYTES 1000
+
 void error(char *msg)
 {
     perror(msg);
@@ -46,12 +48,12 @@ int main(int argc, char *argv[])
     printf("Connection accepted, ready to receive!\n");
     fflush( stdout );
     for (;;) {
-        n = read(newsockfd,buffer,1000);
-        if (n < 0) {
+        n = read(newsockfd, buffer, N_BYTES);
+        if (n != N_BYTES) {
             error("ERROR reading from socket");
         }
-        n = write(newsockfd, buffer, 1000);
-        if (n < 0) {
+        n = write(newsockfd, buffer, N_BYTES);
+        if (n != N_BYTES) {
             error("ERROR writing to socket");
         }
     }
