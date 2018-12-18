@@ -1,3 +1,7 @@
+/*
+ *  A client timing the roundtrip time of a message sent to a server multiple times.
+ *  Usage: ./client.out <address> <port>
+ */
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -8,7 +12,6 @@
 #include <time.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <errno.h>
 #include "connection.h"
 
 #define N_BYTES 1000
@@ -31,6 +34,7 @@ int main(int argc, char *argv[])
     char rbuffer[N_BYTES] = {[0 ... (N_BYTES - 1)] = 'a'};
     char wbuffer[N_BYTES] = {[0 ... (N_BYTES - 1)] = 'a'};
 
+    // Parse args and connect to server
     if (argc < 3) {
        fprintf(stderr,"usage %s hostname port\n", argv[0]);
        exit(0);
@@ -40,7 +44,6 @@ int main(int argc, char *argv[])
     if (sockfd < 0) {
         error("ERROR opening socket");
     }
-
     server = gethostbyname(argv[1]);
     if (server == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
@@ -52,18 +55,18 @@ int main(int argc, char *argv[])
          (char *)&serv_addr.sin_addr.s_addr,
          server->h_length);
     serv_addr.sin_port = htons(portno);
+
+    // Connect and set nonblocking
     if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) {
         error("ERROR connecting");
     }
-    printf("Connection successful! Wait a few sec...");
-    time_t now, later;
-    struct timespec tstart={0,0}, tend={0,0};
-    fflush( stdout );
-
-    // SET NON BLOCKING
     fcntl(sockfd, F_SETFL, O_NONBLOCK);
+    printf("Connection successful! Wait a few sec...");
+    fflush( stdout );
     sleep(2);
-    int r;
+
+    // Timed send-receive loop
+    struct timespec tstart={0,0}, tend={0,0};
     for (int i = 0; i < N_ROUNDS; i++) {
 
         clock_gettime(CLOCK_MONOTONIC, &tstart);

@@ -1,5 +1,7 @@
-/* A simple server in the internet domain using TCP
-   The port number is passed as an argument */
+/*
+ *  A server receiving and sending back a message multiple times.
+ *  Usage: ./server.out <port>
+ */
 #include <stdio.h>
 #include <sys/types.h> 
 #include <sys/socket.h>
@@ -29,6 +31,8 @@ int main(int argc, char *argv[])
         fprintf(stderr,"ERROR, no port provided\n");
         exit(1);
     }
+
+    // Create listening socket
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
         error("ERROR opening socket");
@@ -44,21 +48,27 @@ int main(int argc, char *argv[])
     }
     listen(sockfd, 5);
     clilen = sizeof(cli_addr);
+
+    // Accept connection and set nonblocking
     newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
     if (newsockfd < 0) {
         error("ERROR on accept");
     }
     fcntl(newsockfd, F_SETFL, O_NONBLOCK);
+
+    // Receive-send loop
     printf("Connection accepted, ready to receive!\n");
     fflush( stdout );
-    int r;
     for (int i = 0; i < N_ROUNDS; i++) {
         receive_message(N_BYTES, newsockfd, buffer);
         send_message(N_BYTES, newsockfd, buffer);
     }
     printf("Done!\n");
+
+    // Clean state
     close(sockfd);
     close(newsockfd);
+
     return 0; 
 }
 
