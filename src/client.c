@@ -14,7 +14,7 @@
 #include <fcntl.h>
 #include "connection.h"
 
-#define N_BYTES 1000
+#define N_BYTES 1
 #define N_ROUNDS 1000000
 
 void error(char *msg)
@@ -31,8 +31,8 @@ int main(int argc, char *argv[])
     struct hostent *server;
 
     // Init buffers: 1KB
-    char rbuffer[N_BYTES] = {[0 ... (N_BYTES - 1)] = 'a'};
-    char wbuffer[N_BYTES] = {[0 ... (N_BYTES - 1)] = 'a'};
+    char rbuffer[N_BYTES] = {'a'};
+    char wbuffer[N_BYTES] = {'a'};
 
     // Parse args and connect to server
     if (argc < 3) {

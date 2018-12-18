@@ -12,7 +12,7 @@
 #include <fcntl.h>
 #include "connection.h"
 
-#define N_BYTES 1000
+#define N_BYTES 1
 #define N_ROUNDS 1000000
 
 void error(char *msg)
@@ -24,7 +24,7 @@ void error(char *msg)
 int main(int argc, char *argv[])
 {
     int sockfd, newsockfd, portno, clilen;
-    char buffer[N_BYTES] = {[0 ... (N_BYTES - 1)] = 'a'};
+    char buffer[N_BYTES] = {'a'};
     struct sockaddr_in serv_addr, cli_addr;
     int n;
     if (argc < 2) {
