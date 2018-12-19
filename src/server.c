@@ -14,9 +14,6 @@
 
 #include "connection.h"
 
-#define N_BYTES 1
-#define N_ROUNDS 1000000
-
 void error(char *msg)
 {
     perror(msg);
@@ -25,10 +22,9 @@ void error(char *msg)
 
 int main(int argc, char *argv[])
 {
-    int sockfd, newsockfd, portno, clilen;
-    char buffer[N_BYTES] = {'a'};
+    int sockfd, newsockfd, portno;
+    uint8_t buffer[N_BYTES] = {'a'};
     struct sockaddr_in serv_addr, cli_addr;
-    int n;
     if (argc < 2) {
         fprintf(stderr,"ERROR, no port provided\n");
         exit(1);
@@ -49,7 +45,7 @@ int main(int argc, char *argv[])
         error("ERROR on binding");
     }
     listen(sockfd, 5);
-    clilen = sizeof(cli_addr);
+    socklen_t clilen = sizeof(cli_addr);
 
     // Accept connection and set nonblocking and nodelay
     newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
