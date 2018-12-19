@@ -72,7 +72,8 @@ int main(int argc, char *argv[])
 
     // Timed send-receive loop
     struct timespec tstart={0,0}, tend={0,0};
-    for (int i = 0; i < N_ROUNDS; i++) {
+    int i;
+    for (i = 0; i < N_ROUNDS; i++) {
 
         clock_gettime(CLOCK_MONOTONIC, &tstart);
 
