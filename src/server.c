@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <fcntl.h>
+#include <netinet/tcp.h>
+
 #include "connection.h"
 
 #define N_BYTES 1
@@ -49,12 +51,14 @@ int main(int argc, char *argv[])
     listen(sockfd, 5);
     clilen = sizeof(cli_addr);
 
-    // Accept connection and set nonblocking
+    // Accept connection and set nonblocking and nodelay
     newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen);
     if (newsockfd < 0) {
         error("ERROR on accept");
     }
     fcntl(newsockfd, F_SETFL, O_NONBLOCK);
+    int flag = 1;
+    setsockopt(newsockfd, IPPROTO_TCP, TCP_NODELAY, (void *)&flag, sizeof(int));
 
     // Receive-send loop
     printf("Connection accepted, ready to receive!\n");
