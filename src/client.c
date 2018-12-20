@@ -13,11 +13,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <netinet/tcp.h>
+#include <inttypes.h>
 
 #include "connection.h"
-
-#define N_BYTES 1
-#define N_ROUNDS 1000000
 
 void error(char *msg)
 {
@@ -27,14 +25,14 @@ void error(char *msg)
 
 int main(int argc, char *argv[])
 {
-    int sockfd, portno, n;
+    int sockfd, portno;
 
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
     // Init buffers: 1KB
-    char rbuffer[N_BYTES] = {'a'};
-    char wbuffer[N_BYTES] = {'a'};
+    uint8_t *rbuffer = malloc(N_BYTES);
+    uint8_t *wbuffer = malloc(N_BYTES);
 
     // Parse args and connect to server
     if (argc < 3) {
@@ -71,23 +69,30 @@ int main(int argc, char *argv[])
     sleep(2);
 
     // Timed send-receive loop
-    struct timespec tstart={0,0}, tend={0,0};
-    int i;
-    for (i = 0; i < N_ROUNDS; i++) {
+    uint64_t *times_send = malloc(sizeof(uint64_t) * N_ROUNDS);
+    uint64_t *times_recv = malloc(sizeof(uint64_t) * N_ROUNDS);
+    for (size_t i = 0; i < N_ROUNDS; i++) {
 
-        clock_gettime(CLOCK_MONOTONIC, &tstart);
+        uint64_t tstart = rdtscp();
 
         send_message(N_BYTES, sockfd, wbuffer);
+        uint64_t tsend = rdtsc();
         receive_message(N_BYTES, sockfd, rbuffer);
 
-        clock_gettime(CLOCK_MONOTONIC, &tend);
+        uint64_t tend = rdtsc();
 
-        printf("Round %d took %.9f seconds\n",
-            i,
-           ((double)tend.tv_sec + 1.0e-9*tend.tv_nsec) - 
-           ((double)tstart.tv_sec + 1.0e-9*tstart.tv_nsec));
+        times_send[i] = tsend - tstart;
+        times_recv[i] = tend - tsend;
     }
     close(sockfd);
+    for (size_t i = 0; i < N_ROUNDS; i++) {
+        printf("%" PRIu64 "\t%" PRIu64 "\n", times_send[i], times_recv[i]);
+    }
+    free(times_send);
+    free(times_recv);
+    free(rbuffer);
+    free(wbuffer);
+
     return 0;
 }
 
