@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
-    // Init buffers: 1KB
+    // Init buffers
     uint8_t *rbuffer = malloc(N_BYTES);
     uint8_t *wbuffer = malloc(N_BYTES);
 

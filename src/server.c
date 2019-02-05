@@ -23,7 +23,7 @@ void error(char *msg)
 int main(int argc, char *argv[])
 {
     int sockfd, newsockfd, portno;
-    uint8_t buffer[N_BYTES] = {'a'};
+    uint8_t *buffer = malloc(N_BYTES);
     struct sockaddr_in serv_addr, cli_addr;
     if (argc < 2) {
         fprintf(stderr,"ERROR, no port provided\n");
