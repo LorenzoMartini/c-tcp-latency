@@ -14,6 +14,7 @@
 #include <fcntl.h>
 #include <netinet/tcp.h>
 #include <inttypes.h>
+#include <ctype.h>
 
 #include "connection.h"
 
@@ -23,28 +24,22 @@ void error(char *msg)
     exit(0);
 }
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     int sockfd, portno;
-
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
+    struct Config config = get_config(argc, argv);
+    
     // Init buffers
-    uint8_t *rbuffer = malloc(N_BYTES);
-    uint8_t *wbuffer = malloc(N_BYTES);
+    uint8_t *rbuffer = malloc(config.n_bytes);
+    uint8_t *wbuffer = malloc(config.n_bytes);
 
-    // Parse args and connect to server
-    if (argc < 3) {
-       fprintf(stderr,"usage %s hostname port\n", argv[0]);
-       exit(0);
-    }
-    portno = atoi(argv[2]);
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) {
         error("ERROR opening socket");
     }
-    server = gethostbyname(argv[1]);
+    server = gethostbyname(config.address);
     if (server == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
         exit(0);
@@ -75,9 +70,9 @@ int main(int argc, char *argv[])
 
         uint64_t tstart = rdtscp();
 
-        send_message(N_BYTES, sockfd, wbuffer);
+        send_message(config.n_bytes, sockfd, wbuffer);
         uint64_t tsend = rdtsc();
-        receive_message(N_BYTES, sockfd, rbuffer);
+        receive_message(config.n_bytes, sockfd, rbuffer);
 
         uint64_t tend = rdtsc();
 
@@ -85,8 +80,9 @@ int main(int argc, char *argv[])
         times_recv[i] = tend - tsend;
     }
     close(sockfd);
+    printf("Done!\nSummary: (time_send,\ttime_recv)");
     for (size_t i = 0; i < N_ROUNDS; i++) {
-        printf("%" PRIu64 "\t%" PRIu64 "\n", times_send[i], times_recv[i]);
+        printf("i(%" PRIu64 ",\t%" PRIu64 ")\n", times_send[i], times_recv[i]);
     }
     free(times_send);
     free(times_recv);
