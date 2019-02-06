@@ -25,7 +25,7 @@ void error(char *msg)
 }
 
 int main(int argc, char *argv[]) {
-    int sockfd, portno;
+    int sockfd;
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     bcopy((char *)server->h_addr, 
          (char *)&serv_addr.sin_addr.s_addr,
          server->h_length);
-    serv_addr.sin_port = htons(portno);
+    serv_addr.sin_port = htons(config.port);
 
     // Connect and set nonblocking and nodelay
     if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0) {
