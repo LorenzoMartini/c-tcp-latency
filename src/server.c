@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
         sizeof(serv_addr)) < 0) {
         error("ERROR on binding");
     }
-    printf("\nServer ready, listening on port %d\n", config.port); 
+    printf("Server ready, listening on port %d\n", config.port); 
     fflush(stdout);
     listen(sockfd, 5);
     socklen_t clilen = sizeof(cli_addr);
