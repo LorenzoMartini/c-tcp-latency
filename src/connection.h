@@ -13,7 +13,7 @@ struct Config {
 };
 
 void print_config(struct Config config) {
-    printf("Address: %s, Port: %d, N_bytes: %d", config.address, config.port, config.n_bytes);
+    printf("Address: %s, Port: %d, N_bytes: %d\n", config.address, config.port, config.n_bytes);
 }
 
 struct Config get_config(int argc, char *argv[]) {

@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
     close(sockfd);
     printf("Done!\nSummary: (time_send,\ttime_recv)");
     for (size_t i = 0; i < N_ROUNDS; i++) {
-        printf("i(%" PRIu64 ",\t%" PRIu64 ")\n", times_send[i], times_recv[i]);
+        printf("(%" PRIu64 ",\t%" PRIu64 ")\n", times_send[i], times_recv[i]);
     }
     free(times_send);
     free(times_recv);
