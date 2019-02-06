@@ -59,9 +59,8 @@ int main(int argc, char *argv[]) {
     int flag = 1;
     setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, (void *)&flag, sizeof(int));
 
-    printf("Connection successful! Wait a few sec...");
+    printf("Connection successful! Starting...");
     fflush( stdout );
-    sleep(2);
 
     // Timed send-receive loop
     uint64_t *times_send = malloc(sizeof(uint64_t) * N_ROUNDS);

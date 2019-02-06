@@ -56,7 +56,6 @@ int main(int argc, char *argv[])
 
     // Receive-send loop
     printf("Connection accepted, ready to receive!\n");
-    fflush( stdout );
     int i;
     for (i = 0; i < N_ROUNDS; i++) {
         receive_message(config.n_bytes, newsockfd, buffer);
