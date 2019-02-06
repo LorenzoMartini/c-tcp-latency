@@ -22,13 +22,10 @@ void error(char *msg)
 
 int main(int argc, char *argv[])
 {
-    int sockfd, newsockfd, portno;
-    uint8_t *buffer = malloc(N_BYTES);
+    int sockfd, newsockfd;
+    struct Config config = get_config(argc, argv);
+    uint8_t *buffer = malloc(config.n_bytes);
     struct sockaddr_in serv_addr, cli_addr;
-    if (argc < 2) {
-        fprintf(stderr,"ERROR, no port provided\n");
-        exit(1);
-    }
 
     // Create listening socket
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -36,14 +33,15 @@ int main(int argc, char *argv[])
         error("ERROR opening socket");
     }
     bzero((char *) &serv_addr, sizeof(serv_addr));
-    portno = atoi(argv[1]);
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_addr.s_addr = INADDR_ANY;
-    serv_addr.sin_port = htons(portno);
+    serv_addr.sin_port = htons(config.port);
     if (bind(sockfd, (struct sockaddr *) &serv_addr,
         sizeof(serv_addr)) < 0) {
         error("ERROR on binding");
     }
+    printf("Server ready, listening on port %d\n", config.port); 
+    fflush(stdout);
     listen(sockfd, 5);
     socklen_t clilen = sizeof(cli_addr);
 
@@ -58,11 +56,10 @@ int main(int argc, char *argv[])
 
     // Receive-send loop
     printf("Connection accepted, ready to receive!\n");
-    fflush( stdout );
     int i;
     for (i = 0; i < N_ROUNDS; i++) {
-        receive_message(N_BYTES, newsockfd, buffer);
-        send_message(N_BYTES, newsockfd, buffer);
+        receive_message(config.n_bytes, newsockfd, buffer);
+        send_message(config.n_bytes, newsockfd, buffer);
     }
     printf("Done!\n");
 
