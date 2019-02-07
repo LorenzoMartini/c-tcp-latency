@@ -21,3 +21,6 @@ Similarly, to run the client, from the `src` folder, run
 Where `<server_address>` is the addres (or hostname) of the server machine, `<port>` the same port you ran server with and `<n_bytes>` the same used for server (size of the messages you will send).
 
 The client program, once done, will printo out results for 1M iterations of latency measure, in the format `(<send>, <receive>)`, where `<send>` is the time it took to perform the send, and `<receive>` the time it took from after the send to right after the receive is completed.
+
+## to HDR hist
+You can use the inner Rust program `to_HDRhist` to transform the ugly c output to a nicer HDRhist (https://github.com/utaal/hdrhist-rust) output with ccdfs.
