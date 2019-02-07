@@ -56,4 +56,5 @@ dkms.conf
 # Rust HDRHist converter dirty stuff
 /target/
 Cargo.lock
+.idea
 

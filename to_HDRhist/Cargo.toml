@@ -1,0 +1,11 @@
+[package]
+
+name = "to_HDRhist"
+version = "0.0.0"
+authors = ["Lorenzo Martini <lmartini@student.ethz.ch>"]
+readme = "README.md"
+
+description = "A Rust program to collect in a HDRhist to measures of c-tcp latency"
+
+[dependencies]
+streaming-harness-hdrhist = { git = "https://github.com/utaal/hdrhist-rust" }
